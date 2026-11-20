@@ -1,0 +1,205 @@
+# Rules for the A2SV top-tech list.
+# The README is generated from this file. Edit this file, then run:
+#   python -m a2sv_roles
+
+# Companies with the most A2SV offers in the public impact report.
+# https://a2sv.org/impact-report
+companies:
+  - name: Google
+    rank: 1
+    aliases: ["Google"]
+    exclude: []
+    careers: "https://www.google.com/about/careers/applications/"
+  - name: Bloomberg
+    rank: 2
+    aliases: ["Bloomberg", "Bloomberg LP"]
+    # A different company. Do not treat it as Bloomberg.
+    exclude: ["Bloomberg Industry Group", "Bloomberg News", "Bloomberg Philanthropies"]
+    careers: "https://careers.bloomberg.com/"
+  - name: Amazon
+    rank: 3
+    aliases: ["Amazon", "Amazon.com", "Amazon Web Services", "AWS"]
+    exclude: []
+    careers: "https://www.amazon.jobs/en/teams/internships-for-students"
+  - name: Goldman Sachs
+    rank: 4
+    aliases: ["Goldman Sachs", "Goldman"]
+    exclude: []
+    careers: "https://www.goldmansachs.com/careers/students"
+  - name: Databricks
+    rank: 5
+    aliases: ["Databricks"]
+    exclude: []
+    careers: "https://www.databricks.com/company/careers"
+  - name: Palantir
+    rank: 6
+    aliases: ["Palantir", "Palantir Technologies"]
+    exclude: []
+    careers: "https://www.palantir.com/careers/"
+
+# Where those offers have actually been. United States is last so Europe
+# stays at the top of each company.
+countries:
+  - name: United Kingdom
+    rank: 1
+    any: ["united kingdom", "london", "manchester", "edinburgh", "glasgow", "bristol", "belfast", "cambridge"]
+    words: ["uk"]
+  - name: Germany
+    rank: 2
+    any: ["germany", "berlin", "munich", "münchen", "munchen", "frankfurt", "hamburg", "stuttgart"]
+    words: []
+  - name: Ireland
+    rank: 3
+    any: ["ireland", "dublin", "cork", "galway"]
+    words: []
+  - name: Poland
+    rank: 4
+    any: ["poland", "warsaw", "krakow", "kraków", "gdansk", "gdańsk", "wroclaw", "wrocław"]
+    words: []
+  - name: Netherlands
+    rank: 5
+    any: ["netherlands", "amsterdam", "eindhoven", "rotterdam", "utrecht", "the hague"]
+    words: []
+  - name: United States
+    rank: 6
+    any: ["united states", "u.s.", "usa", "nyc", "new york", "seattle", "san francisco", "mountain view", "palo alto", "sunnyvale", "san jose", "santa clara", "redmond", "bellevue", "austin", "boston", "chicago", "los angeles", "atlanta", "denver", "pittsburgh", "boulder", "irvine", "cupertino", "menlo park"]
+    words: []
+    # Also match a trailing state code such as ", CA" or ", DC".
+    states: true
+
+# A location that contains one of these is not an A2SV target, even if
+# another word in the same text looks familiar.
+skip_locations_containing:
+  - india
+  - bengaluru
+  - bangalore
+  - hyderabad
+  - pune
+  - chennai
+  - china
+  - shanghai
+  - beijing
+  - shenzhen
+  - singapore
+  - japan
+  - tokyo
+  - israel
+  - tel aviv
+  - haifa
+  - canada
+  - toronto
+  - vancouver
+  - montreal
+  - montréal
+  - ottawa
+  - waterloo
+  - korea
+  - seoul
+  - taiwan
+  - taipei
+  - brazil
+  - mexico
+  - australia
+  - sydney
+  - romania
+  - bucharest
+  - spain
+  - madrid
+  - luxembourg
+  - south africa
+  - cape town
+
+# Drop roles posted longer ago than this. Simplify also marks closed roles
+# with active: false, and those are always dropped.
+max_age_days: 90
+
+# Drop these Simplify categories even if the title contains "engineer".
+# AI and data roles stay in when the title itself is a software role.
+# speedyapply rows have no category, so this does not apply to them.
+drop_categories: ["Hardware", "Product", "Product Management"]
+
+# The title must contain one of these. This keeps hardware, sales, and
+# research-scientist roles out even when a source files them under software.
+software_title_any:
+  - software
+  - developer
+  - swe
+  - sde
+  - full stack
+  - fullstack
+  - full-stack
+  - frontend
+  - front-end
+  - backend
+  - back-end
+  - site reliability
+  - sre
+  - android
+  - ios
+
+title:
+  # Always drop, intern or new grad.
+  drop_words: ["apprentice", "consultant", "phd"]
+  drop_patterns: ["\\bqa\\b", "\\bsupport\\b", "\\bsales\\b", "\\bsenior\\b", "\\bstaff\\b", "\\bprincipal\\b", "\\bmanager\\b", "\\barchitect\\b", "\\biii\\b", "\\bsr\\b", "\\blead\\b"]
+  # "Engineer II" is dropped unless the title also says it is early-career.
+  level_ii_patterns: ["\\bii\\b"]
+  level_ii_ok_if: ["early career", "new grad", "new college", "university graduate"]
+  new_grad_any:
+    - new grad
+    - early career
+    - university
+    - graduate
+    - new college
+    - junior
+    - entry level
+    - entry-level
+    - college grad
+    - "2026"
+    - "2027"
+  new_grad_patterns: ["\\bengineer i\\b", "\\bdeveloper i\\b", "\\bsde i\\b"]
+  intern_any: ["intern", "co-op", "coop", "co op"]
+
+# Internship rows whose season is only a past cycle are dropped.
+# A row that also lists a 2027 season is kept.
+past_intern_terms: ["Summer 2025", "Fall 2025", "Winter 2025", "Spring 2026", "Summer 2026", "Fall 2026", "Winter 2026"]
+
+sources:
+  - id: simplify-intern
+    name: Simplify internships
+    page: "https://github.com/SimplifyJobs/Summer2027-Internships"
+    url: "https://raw.githubusercontent.com/SimplifyJobs/Summer2027-Internships/dev/.github/scripts/listings.json"
+    format: simplify-json
+    track: intern
+  - id: simplify-newgrad
+    name: Simplify new grad
+    page: "https://github.com/SimplifyJobs/New-Grad-Positions"
+    url: "https://raw.githubusercontent.com/SimplifyJobs/New-Grad-Positions/dev/.github/scripts/listings.json"
+    format: simplify-json
+    track: new_grad
+  - id: speedyapply-us-intern
+    name: speedyapply US internships
+    page: "https://github.com/speedyapply/2027-SWE-College-Jobs"
+    url: "https://raw.githubusercontent.com/speedyapply/2027-SWE-College-Jobs/main/README.md"
+    format: speedyapply-md
+    track: intern
+    # This file is the US list. A row that only says "Remote" stays.
+    default_country: United States
+  - id: speedyapply-us-newgrad
+    name: speedyapply US new grad
+    page: "https://github.com/speedyapply/2027-SWE-College-Jobs/blob/main/NEW_GRAD_USA.md"
+    url: "https://raw.githubusercontent.com/speedyapply/2027-SWE-College-Jobs/main/NEW_GRAD_USA.md"
+    format: speedyapply-md
+    track: new_grad
+    default_country: United States
+  - id: speedyapply-intl-intern
+    name: speedyapply international internships
+    page: "https://github.com/speedyapply/2027-SWE-College-Jobs/blob/main/INTERN_INTL.md"
+    url: "https://raw.githubusercontent.com/speedyapply/2027-SWE-College-Jobs/main/INTERN_INTL.md"
+    format: speedyapply-md
+    track: intern
+  - id: speedyapply-intl-newgrad
+    name: speedyapply international new grad
+    page: "https://github.com/speedyapply/2027-SWE-College-Jobs/blob/main/NEW_GRAD_INTL.md"
+    url: "https://raw.githubusercontent.com/speedyapply/2027-SWE-College-Jobs/main/NEW_GRAD_INTL.md"
+    format: speedyapply-md
+    track: new_grad
