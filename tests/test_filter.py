@@ -1,4 +1,6 @@
 import unittest
+from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 
 import yaml
@@ -6,6 +8,7 @@ import yaml
 from a2sv_roles.filter import match_company, matching_locations, select, title_ok
 from a2sv_roles.model import Role
 from a2sv_roles.parse import parse_speedyapply
+from a2sv_roles.render import render
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = yaml.safe_load((ROOT / "sources.yml").read_text())
@@ -130,6 +133,23 @@ class ParseTest(unittest.TestCase):
         self.assertEqual(rows[0].age_days, 2)
         self.assertEqual(rows[1].locations, ["London, United Kingdom"])
         self.assertEqual(rows[1].title, "Software Engineer - New Grad - 2027")
+
+
+class RenderTest(unittest.TestCase):
+    def test_europe_comes_first_and_the_role_title_is_the_link(self):
+        london = role(country="United Kingdom", country_rank=1, kept_locations=["London, United Kingdom"])
+        seattle = role(
+            title="Software Engineer I",
+            url="https://example.com/jobs/2",
+            locations=["Seattle, WA"],
+            kept_locations=["Seattle, WA"],
+            country="United States",
+            country_rank=6,
+        )
+        page = render([london, seattle], CONFIG, [], Counter(), datetime(2026, 11, 22, 10, 31, tzinfo=UTC))
+        self.assertLess(page.index("## Open outside the US"), page.index("## New grad"))
+        self.assertIn("[Software Development Engineer - 2027](https://example.com/jobs/1)", page)
+        self.assertIn("London, UK", page)
 
 
 if __name__ == "__main__":
